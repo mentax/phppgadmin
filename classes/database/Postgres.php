@@ -285,7 +285,7 @@ class Postgres extends ADODB_base {
 			case 'jsonb':
 			case 'xml':
 			case 'xml[]':
-				$n = substr_count($value, "\n");
+				$n = substr_count($value.'', "\n");
 				$n = $n < 5 ? 5 : $n;
 				$n = $n > 20 ? 20 : $n;
 				echo "<textarea name=\"", htmlspecialchars($name.''), "\" rows=\"{$n}\" cols=\"75\"{$extra_str}>\n";
@@ -294,7 +294,7 @@ class Postgres extends ADODB_base {
 				break;
 			case 'character':
 			case 'character[]':
-				$n = substr_count($value, "\n");
+				$n = substr_count($value.'', "\n");
 				$n = $n < 5 ? 5 : $n;
 				$n = $n > 20 ? 20 : $n;
 				echo "<textarea name=\"", htmlspecialchars($name.''), "\" rows=\"{$n}\" cols=\"35\"{$extra_str}>\n";
