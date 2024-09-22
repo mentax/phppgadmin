@@ -78,7 +78,7 @@
 					$_REQUEST['default'] = $_REQUEST['olddefault'] = $column->fields['adsrc'];
 					if ($column->fields['attnotnull']) $_REQUEST['notnull'] = 'YES';
 					$_REQUEST['comment'] = $column->fields['comment'];
-				}		
+				}
 
 				// Column name
 				echo "<tr><td><input name=\"field\" size=\"16\" maxlength=\"{$data->_maxNameLen}\" value=\"",
