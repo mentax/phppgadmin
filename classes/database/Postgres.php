@@ -7785,7 +7785,7 @@ class Postgres extends ADODB_base {
 				else $orderby = array($sort_pkey ?: '1' => 'DESC');
 				$query = $this->getSelectSQL($table, array(), array(), array(), $orderby);
 
-                // Generate count query
+				// Generate count query
 				$count = "SELECT COUNT(*) AS total FROM $table";
 				break;
 			case 'QUERY':
@@ -7796,7 +7796,7 @@ class Postgres extends ADODB_base {
 				if (substr($query, strlen($query) - 1, 1) === ';')
 					$query = substr($query, 0, strlen($query) - 1);
 
-                // Generate count query
+				// Generate count query
 				$count = "SELECT COUNT(*) AS total FROM ($query) AS sub";
 				break;
 			default:
