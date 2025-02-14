@@ -7784,6 +7784,9 @@ class Postgres extends ADODB_base {
 				if (preg_match('/^[0-9]+$/', $sortkey) && $sortkey > 0) $orderby = array($sortkey => $sortdir, $sort_pkey ?: '1' => $sortdir);
 				else $orderby = array($sort_pkey ?: '1' => 'DESC');
 				$query = $this->getSelectSQL($table, array(), array(), array(), $orderby);
+
+                // Generate count query
+				$count = "SELECT COUNT(*) AS total FROM $table";
 				break;
 			case 'QUERY':
 			case 'SELECT':
@@ -7792,13 +7795,13 @@ class Postgres extends ADODB_base {
 				// Trim off trailing semi-colon if there is one
 				if (substr($query, strlen($query) - 1, 1) === ';')
 					$query = substr($query, 0, strlen($query) - 1);
+
+                // Generate count query
+				$count = "SELECT COUNT(*) AS total FROM ($query) AS sub";
 				break;
 			default:
 				return -4;
 		}
-
-		// Generate count query
-		$count = "SELECT COUNT(*) AS total FROM ($query) AS sub";
 
 		// Open a transaction
 		$status = $this->beginTransaction();
