@@ -430,7 +430,7 @@ class Postgres extends ADODB_base {
 	}
 
 	function getHelpPages() {
-		include_once('./help/PostgresDoc14.php');
+		include_once('./help/PostgresDocDevel.php');
 		return $this->help_page;
 	}
 
@@ -6971,16 +6971,55 @@ class Postgres extends ADODB_base {
 		return $this->execute($sql);
 	}
 
-	/**
-	 * Helper function that computes encrypted PostgreSQL passwords
-	 * @param $username The username
-	 * @param $password The password
-	 */
-	function _encryptPassword($username, $password) {
-		return 'md5' . md5($password . $username);
-	}
+    /**
+     * Helper function that computes encrypted PostgreSQL passwords
+     * @param $username The username
+     * @param $password The password
+     */
+    function _encryptPassword($username, $password) {
+        return $this->_generate_postgresql_scram_sha256_verifier($password);
+    }
 
-	// Tablespace functions
+    /**
+     * Generuje skrót hasła SCRAM-SHA-256 kompatybilny z PostgreSQL.
+     *
+     * @param string $password Hasło w postaci czystego tekstu (UTF-8).
+     * @param int $iterations Liczba iteracji PBKDF2 (domyślnie dla PostgreSQL >= 16 to 4096).
+     * @param int $saltLength Długość soli w bajtach (domyślnie 16).
+     * @return string Wygenerowany skrót hasła SCRAM-SHA-256.
+     * @throws Exception Jeśli generowanie bezpiecznych losowych bajtów zawiedzie.
+     */
+    function _generate_postgresql_scram_sha256_verifier(string $password, int $iterations = 4096, int $saltLength = 16): string
+    {
+        $salt = random_bytes($saltLength);
+
+        // 3. Obliczenie SaltedPassword przy użyciu PBKDF2-HMAC-SHA256
+        // Ostatni argument `true` dla hash_pbkdf2 zwraca surowe dane binarne.
+        // Długość wyjściowa (trzeci od końca argument) 0 oznacza domyślną długość dla SHA256 (32 bajty).
+        $saltedPassword = hash_pbkdf2('sha256', $password, $salt, $iterations, 0, true);
+
+        // 4. Obliczenie ClientKey
+        $clientKey = hash_hmac('sha256', "Client Key", $saltedPassword, true);
+
+        $storedKey = hash('sha256', $clientKey, true);
+        $serverKey = hash_hmac('sha256', "Server Key", $saltedPassword, true);
+
+        $saltBase64 = base64_encode($salt);
+        $storedKeyBase64 = base64_encode($storedKey);
+        $serverKeyBase64 = base64_encode($serverKey);
+
+        // 8. Złożenie finalnego ciągu
+        return sprintf(
+            'SCRAM-SHA-256$%d:%s$%s:%s',
+            $iterations,
+            $saltBase64,
+            $storedKeyBase64,
+            $serverKeyBase64
+        );
+    }
+
+
+    // Tablespace functions
 
 	/**
 	 * Retrieves information for all tablespaces

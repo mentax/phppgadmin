@@ -288,24 +288,6 @@ class Postgres80 extends Postgres81 {
 		return 0;
 	}
 
-	// Role, User/group functions
-
-	/**
-	 * Changes a user's password
-	 * @param $username The username
-	 * @param $password The new password
-	 * @return 0 success
-	 */
-	function changePassword($username, $password) {
-		$enc = $this->_encryptPassword($username, $password);
-		$this->fieldClean($username);
-		$this->clean($enc);
-
-		$sql = "ALTER USER \"{$username}\" WITH ENCRYPTED PASSWORD '{$enc}'";
-
-		return $this->execute($sql);
-	}
-
 	// Aggregate functions
 
 	/**

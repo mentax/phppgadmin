@@ -52,6 +52,15 @@ class Postgres96 extends Postgres10 {
 		return $this->selectSet( $sql );
 	}
 
+	/**
+	 * Helper function that computes encrypted PostgreSQL passwords
+	 * To version 10 md5 was the only option
+	 * @param $username The username
+	 * @param $password The password
+	 */
+	function _encryptPassword($username, $password) {
+		return 'md5' . md5($password . $username);
+	}
 
 }
 ?>
